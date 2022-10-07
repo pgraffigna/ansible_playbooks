@@ -1,0 +1,31 @@
+---
+- hosts: ansible_test
+  become: yes
+
+  tasks:
+    - name: reiniciar apache
+      service:
+        name: apache2
+        state: restarted
+      notify: notificacion
+
+  handlers:
+    - name: notificacion
+      mail:
+        host: smtp-server
+        port: 587
+        username: usuario
+        password: ***********
+        from: emisor (nombre a mostrar)
+        to: "{{ item }}"
+        subject: << Reporte Ansible >>
+        body: |
+          Reiniciamos el servicio Apache en los siguientes servidores:
+          {% for item in ansible_play_hosts_all %}
+          - {{ item }}
+          {% endfor %}
+        headers: 'Reply-To=emisor|X-Special="No es SPAM"'
+        charset: utf8
+      with_items:
+      - correo_1
+      - correo_2
